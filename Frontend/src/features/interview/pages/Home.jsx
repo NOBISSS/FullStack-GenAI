@@ -1,19 +1,24 @@
+import "../style/home.scss"
 const Home = () => {
   return (
     <main className='home'>
+        <div className="interview-input-group">
         <div className="left">
+            <label htmlFor="jobDescription">Job Description</label>
             <textarea name='jobDescription' id='jobDescription' placeholder='Enter job description here...'></textarea>
         </div>
         <div className="right">
             <div className="input-group">
-                <label htmlFor="resume">Upload Resume</label>
-                <input type="file" name="resume" id="resume" accept=".pdf" />
+                <p>Resume <small className="highlight">(Use Resume and Self Description to gather for best results)</small></p>
+                <label class="file-label" htmlFor="resume">Upload Resume</label>
+                <input hidden type="file" name="resume" id="resume" accept=".pdf" />
             </div>
             <div className="input-group">
                 <label htmlFor="selfDescription">Describe Yourself</label>
                 <textarea name="selfDescription" id="selfDescription" placeholder="Enter your self-description here..."></textarea>
             </div>
-            <button className="generate-btn">Generate Interview Report</button>
+            <button className="button primary-button">Generate Interview Report</button>
+        </div>
         </div>
     </main>
   )
