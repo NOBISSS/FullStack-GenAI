@@ -32,20 +32,52 @@ const interviewReportSchema = z.object({
 async function generateInterviewReport({ resume, selfdescribe, jobdescribe }) {
 
     const prompt = `
-    Generate an interview report for the candidate the following information:
-    Resume: ${resume}
-    Self describe: ${selfdescribe}
-    Job describe: ${jobdescribe}`
+You are a senior technical interviewer preparing a candidate for a real interview.
+
+Base every part of your output strictly on the three inputs below — do not invent
+skills, experience, or company details that aren't implied by them.
+
+<resume>
+${resume || "Not provided."}
+</resume>
+
+<self_description>
+${selfdescribe || "Not provided."}
+</self_description>
+
+<job_description>
+${jobdescribe}
+</job_description>
+
+Instructions:
+- Compare the candidate's actual background (resume/self-description) against the
+  job description to find real, specific gaps — not generic ones.
+- Generate exactly 4-5 technical questions and 3-4 behavioral questions, each
+  tailored to the technologies and responsibilities named in the job description.
+- List 3-5 skill gaps, ranked by how much each one would hurt the candidate's
+  chances for THIS specific role.
+- Build a realistic day-by-day preparation plan (as many days as make sense,
+  suggest 5-7) that directly addresses the skill gaps you identified.
+- Keep matchScore honest: a strong resume match for this JD should score 75+,
+  a weak one should score well below 50.
+`;
 
     const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
+        model: "gemini-3.5-flash",
         contents: prompt,
         config: {
             responseMimeType: "application/json",
-            responseSchema: zodToJsonSchema(interviewReportSchema)
+            responseSchema: z.toJSONSchema(interviewReportSchema),
+            temperature: 0.4,
         }
     })
-    console.log(response.text)
+    if (!response.text) {
+        console.error("No text in response:", JSON.stringify(response, null, 2));
+        throw new Error("Gemini returned no content — check finishReason/blockReason above.");
+    }
+
+    const parsed = interviewReportSchema.parse(JSON.parse(response.text));
+    return parsed;
 }
 
 module.exports = generateInterviewReport;
